@@ -22,13 +22,13 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
-            'title',
+            ['class' => 'frontend\widgets\grid\account\TitleColumn', 'header' => Yii::t('account', 'Title')],
+            ['class' => 'frontend\widgets\grid\account\BalanceColumn', 'header' => Yii::t('account', 'Balance')],
 //            'id',
 //            'user_id',
             'type',
             'currency',
-            
+
             // 'parent_id',
             // 'virtual',
 

@@ -8,6 +8,7 @@ use yii\data\ActiveDataProvider;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\data\ArrayDataProvider;
 
 /**
  * AccountController implements the CRUD actions for Account model.
@@ -32,8 +33,9 @@ class AccountController extends Controller
      */
     public function actionIndex()
     {
-        $dataProvider = new ActiveDataProvider([
-            'query' => Account::find(),
+        $dataProvider = new ArrayDataProvider([
+            'allModels' => Account::hierarcyForUser(Yii::$app->user->getId()),
+            'key' => 'id',
         ]);
 
         return $this->render('index', [
