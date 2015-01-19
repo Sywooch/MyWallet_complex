@@ -16,7 +16,7 @@ use frontend\models\Account;
     <?php $form = ActiveForm::begin(); ?>
 
     <?php if ($model->scenario == 'insert') : ?>
-        <?= $form->field($model, 'type')->dropDownList([ 'income' => 'Income', 'expense' => 'Expense', 'money' => 'Money', 'credit' => 'Credit', 'creditcard' => 'Creditcard', 'invest' => 'Invest', 'card' => 'Card', ], ['prompt' => '']) ?>
+        <?= $form->field($model, 'type')->dropDownList([ 'money' => 'Money', 'credit' => 'Credit', 'creditcard' => 'Creditcard', 'invest' => 'Invest', 'card' => 'Card', 'bonus' => 'Bonus'], ['prompt' => '']) ?>
         <?= $form->field($model, 'currency')->dropDownList(yii\helpers\ArrayHelper::merge(["" => ""], Currency::all())); ?>
     <?php else : ?>
         <?= $form->field($model, 'type')->textInput(['disabled' => 'true']);?>
