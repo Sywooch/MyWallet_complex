@@ -11,15 +11,15 @@ class BalanceColumn extends Column {
      * @inheritdoc
      */
     protected function renderDataCellContent($model, $key, $index) {
-        if (is_null($model->balance())) {
+        if (is_null($model->startBalance())) {
             return;
         }
         $divAttr = "";
-        if ($model->balance() <= 0) {
+        if ($model->startBalance() <= 0) {
             $divAttr .= ' class="sum-negative"';
         }
         return '<div'. $divAttr .'>'
-                . $model->renderBalance()
+                . $model->renderStartBalance()
                 . '</div>';
     }
 

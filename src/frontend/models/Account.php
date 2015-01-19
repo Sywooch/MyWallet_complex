@@ -18,6 +18,12 @@ class Account extends \yii\db\ActiveRecord
 {
     public $level = 0;
 
+    public function scenarios() {
+        $scenarios = parent::scenarios();
+        $scenarios['insert'] = $scenarios['default'];
+        return $scenarios;
+    }
+
     /**
      * @inheritdoc
      */
@@ -34,10 +40,10 @@ class Account extends \yii\db\ActiveRecord
             [['parent_id'], 'integer'],
             [['type'], 'string'],
             [['currency'], 'required', 'when' => function($model) {
-            return !(bool) $model->virtual;
-        }, 'whenClient' => "function (attribute, value) {
-                return $('#currency').attr('checked');
-            }"],
+                return !(bool) $model->virtual;
+            }, 'whenClient' => "function (attribute, value) {
+                    return $('#currency').attr('checked');
+                }"],
             [['title'], 'string', 'max' => 255],
             [['virtual'], 'default', 'value' => 0],
         ];
@@ -97,8 +103,12 @@ class Account extends \yii\db\ActiveRecord
         return $this->hasOne(User::className(), ['id' => 'user_id']);
     }
 
-    public static function forUser($userId) {
-        return self::find()->where(["user_id" => $userId]);
+    public static function forUser($userId, $types) {
+        $condition = ["user_id" => $userId];
+        if ($types) {
+            $condition['type'] = $types;
+        }
+        return self::find()->where($condition);
     }
 
     private static function _buildHierarchy($item, $level = 0) {
@@ -116,11 +126,11 @@ class Account extends \yii\db\ActiveRecord
         return $res;
     }
 
-    public static function hierarcyForUser($userId) {
+    public static function hierarcyForUser($userId, $types = null) {
         $result = array();
         $tree = array();
         $indexed = array();
-        $models = self::forUser($userId)->all();
+        $models = self::forUser($userId, $types)->all();
         $oldCount = null;
         $it = 0;
         while ($m = array_shift($models)) {
@@ -151,18 +161,29 @@ class Account extends \yii\db\ActiveRecord
         return $result;
     }
 
-    public function balance() {
-        if ($this->virtual) {
-            return null;
-        }
-        return -753.2;
+    public static function plainHierarcyForUser($userId, $types = null) {
+        $result = array_map(function($item) {return str_pad("", $item->level, "-") . ' ' . $item->title;}, self::hierarcyForUser($userId, $types));
+        return $result;
     }
 
-    public function renderBalance() {
+    public function startBalance() {
+        if ($this->virtual) {
+            // TODO: Sum of children
+            return null;
+        }
+        $balance = Balance::find()->where(['account_id' => $this->id])->orderBy(['date' => 'desc'])->limit(1)->one();
+        if (is_null($balance)) {
+            return 0;
+        }
+        // TODO: add date check and fix it if not found
+        return (float)$balance->sum;
+    }
+
+    public function renderStartBalance() {
         if ($this->virtual) {
             return "";
         }
-        return sprintf($this->getCurrency()->one()->format, $this->balance());
+        return sprintf($this->getCurrency()->one()->format, $this->startBalance());
     }
 
 }

@@ -221,9 +221,8 @@ SQL;
     }
 
     public function down() {
-        echo "m150115_203944_old_project_db_structure cannot be reverted.\n";
-
-        return false;
+        $sql = "DROP TABLE `account`, `currency`, `currency_course`, `expense`, `expense_account`, `expense_pay`, `income`, `income_account`, `month`, `plan`, `starting`, `transfer`;";
+        $this->execute($sql);
     }
 
 }

@@ -3,17 +3,16 @@
 namespace frontend\controllers;
 
 use Yii;
-use frontend\models\Account;
-use frontend\models\Balance;
+use frontend\models\Transfer;
+use yii\data\ActiveDataProvider;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
-use yii\data\ArrayDataProvider;
 
 /**
- * AccountController implements the CRUD actions for Account model.
+ * TransferController implements the CRUD actions for Transfer model.
  */
-class AccountController extends Controller
+class TransferController extends Controller
 {
     public function behaviors()
     {
@@ -28,14 +27,13 @@ class AccountController extends Controller
     }
 
     /**
-     * Lists all Account models.
+     * Lists all Transfer models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $dataProvider = new ArrayDataProvider([
-            'allModels' => Account::hierarcyForUser(Yii::$app->user->getId()),
-            'key' => 'id',
+        $dataProvider = new ActiveDataProvider([
+            'query' => Transfer::find(),
         ]);
 
         return $this->render('index', [
@@ -44,7 +42,7 @@ class AccountController extends Controller
     }
 
     /**
-     * Displays a single Account model.
+     * Displays a single Transfer model.
      * @param integer $id
      * @return mixed
      */
@@ -56,42 +54,31 @@ class AccountController extends Controller
     }
 
     /**
-     * Creates a new Account model.
+     * Creates a new Transfer model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
     {
-        $model = new Account();
-        $model->scenario = 'insert';
-        $balance = new Balance();
-        $balance->scenario = 'insert';
+        $model = new Transfer();
 
-        $loaded = $model->load(Yii::$app->request->post()) && $balance->load(Yii::$app->request->post());
+        $loaded = $model->load(Yii::$app->request->post());
 
-        $valid = false;
-
-        if ($loaded) {
-            $valid = $model->validate();
-            $valid = $valid && ($model->virtual || $balance->validate(['sum']));
+        if (!$loaded) {
+            $model->date = date('Y-m-d H:i:s');
         }
 
-        if ($valid) {
-            $model->save();
-            $balance->date = date('Y-m-d', strtotime('first day of this month'));
-            $balance->account_id = $model->id;
-            $balance->save();
+        if ($loaded && $model->save()) {
             return $this->redirect(['view', 'id' => $model->id]);
         } else {
             return $this->render('create', [
                 'model' => $model,
-                'balance' => $balance,
             ]);
         }
     }
 
     /**
-     * Updates an existing Account model.
+     * Updates an existing Transfer model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
@@ -110,7 +97,7 @@ class AccountController extends Controller
     }
 
     /**
-     * Deletes an existing Account model.
+     * Deletes an existing Transfer model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param integer $id
      * @return mixed
@@ -123,15 +110,15 @@ class AccountController extends Controller
     }
 
     /**
-     * Finds the Account model based on its primary key value.
+     * Finds the Transfer model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return Account the loaded model
+     * @return Transfer the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = Account::findOne($id)) !== null) {
+        if (($model = Transfer::findOne($id)) !== null) {
             return $model;
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');

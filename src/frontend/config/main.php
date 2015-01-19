@@ -50,6 +50,13 @@ return [
                         'currency' => 'currency.php',
                     ),
                 ],
+                'transfer*' => [
+                    'class' => 'yii\i18n\PhpMessageSource',
+                    'sourceLanguage' => 'en',
+                    'fileMap' => array(
+                        'currency' => 'transfer.php',
+                    ),
+                ],
             ],
         ],
     ],
