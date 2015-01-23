@@ -9,6 +9,7 @@ use Yii;
  *
  * @property integer $id
  * @property string $date
+ * @property string $type
  * @property integer $source
  * @property string $out_sum
  * @property integer $dest
@@ -22,6 +23,11 @@ use Yii;
  */
 class Transfer extends \yii\db\ActiveRecord
 {
+
+    const TYPE_INCOMING = 'incoming';
+    const TYPE_OUTGOING = 'outgoing';
+    const TYPE_INTERNAL = 'internal';
+
     /**
      * @inheritdoc
      */
