@@ -4,7 +4,7 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 use frontend\models\Account;
-
+use frontend\models\TransferAccount;
 /* @var $this yii\web\View */
 /* @var $model frontend\models\Transfer */
 /* @var $form yii\widgets\ActiveForm */
@@ -16,6 +16,22 @@ use frontend\models\Account;
 
     <?= $form->field($model, 'date')->textInput() ?>
 
+    <?= $form->field($model, 'comment')->textarea(['rows' => 6]) ?>
+
+    <?= $form->field($model, 'comission')->textInput(['maxlength' => 10]) ?>
+
+    <div class="account-in-wrapper">
+        <h3>Incoming</h3>
+        <a href="#" role="add-account">+ Add</a>
+        <?php foreach ($inAccounts as $account) : ?>
+        <div class="tranfer-account" id="transfer_account_<?=$account->id;?>">
+            <?= $form->field($account, 'account_id')->dropDownList(Account::plainHierarcyForUser(Yii::$app->user->getId())); ?>
+            <?= $form->field($account, 'sum')->textInput(['maxlength' => 10]) ?>
+        </div>
+        <?php endforeach; ?>
+    </div>
+
+
     <?= $form->field($model, 'source')->dropDownList(yii\helpers\ArrayHelper::merge(["" => ""], Account::plainHierarcyForUser(Yii::$app->user->getId()))); ?>
 
     <?= $form->field($model, 'out_sum')->textInput(['maxlength' => 10]) ?>
@@ -26,9 +42,16 @@ use frontend\models\Account;
 
     <?= $form->field($model, 'ratio')->textInput(['maxlength' => 10]) ?>
 
-    <?= $form->field($model, 'comission')->textInput(['maxlength' => 10]) ?>
 
-    <?= $form->field($model, 'comment')->textarea(['rows' => 6]) ?>
+
+    <div class="tranfer-account in source">
+        <?php
+            $acc = new TransferAccount();
+            $acc->type = 'in';
+        ?>
+        <?= $form->field($acc, 'account_id')->dropDownList(yii\helpers\ArrayHelper::merge(["" => ""], Account::plainHierarcyForUser(Yii::$app->user->getId()))); ?>
+        <?= $form->field($acc, 'sum')->textInput(['maxlength' => 10]) ?>
+    </div>
 
     <div class="form-group">
         <?= Html::submitButton($model->isNewRecord ? Yii::t('transfer', 'Create') : Yii::t('transfer', 'Update'), ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>
@@ -37,3 +60,7 @@ use frontend\models\Account;
     <?php ActiveForm::end(); ?>
 
 </div>
+
+<?php
+
+?>

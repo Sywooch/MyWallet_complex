@@ -10,6 +10,7 @@ use Yii;
  * @property integer $id
  * @property integer $transfer_id
  * @property integer $account_id
+ * @property string $in
  * @property string $sum
  * @property string $description
  *
@@ -18,6 +19,16 @@ use Yii;
  */
 class TransferAccount extends \yii\db\ActiveRecord
 {
+    public function formName() {
+        $name = parent::formName();
+        $name .= "_" . $this->type;
+        if (!$this->id) {
+            $name .= "_newtransferaccount";
+        } else {
+            $name .= "_" . $this->id;
+        }
+        return $name;
+    }
     /**
      * @inheritdoc
      */
@@ -34,6 +45,7 @@ class TransferAccount extends \yii\db\ActiveRecord
         return [
             [['transfer_id', 'account_id', 'sum'], 'required'],
             [['transfer_id', 'account_id'], 'integer'],
+            [['type'], 'safe'],
             [['sum'], 'number'],
             [['description'], 'string', 'max' => 1024]
         ];
@@ -48,6 +60,7 @@ class TransferAccount extends \yii\db\ActiveRecord
             'id' => Yii::t('transfer', 'ID'),
             'transfer_id' => Yii::t('transfer', 'Transfer ID'),
             'account_id' => Yii::t('transfer', 'Account ID'),
+            'type' => Yii::t('transfer', 'Type'),
             'sum' => Yii::t('transfer', 'Sum'),
             'description' => Yii::t('transfer', 'Description'),
         ];

@@ -22,6 +22,7 @@ class AppAsset extends AssetBundle
         'css/mywallet.css',
     ];
     public $js = [
+        'js/transfer.js',
     ];
     public $depends = [
         'yii\web\YiiAsset',

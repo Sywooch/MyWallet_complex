@@ -42,10 +42,10 @@ class Transfer extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['date', 'source', 'out_sum', 'dest', 'in_sum', 'ratio', 'comission', 'comment'], 'required'],
+            [['date', 'comment'], 'required'],
             [['date'], 'safe'],
-            [['source', 'dest'], 'integer'],
-            [['out_sum', 'in_sum', 'ratio', 'comission'], 'number'],
+            [['comission'], 'number'],
+            [['comission'], 'default', 'value' => 0],
             [['comment'], 'string']
         ];
     }

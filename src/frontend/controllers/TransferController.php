@@ -9,6 +9,7 @@ use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
+use frontend\models\TransferAccount;
 /**
  * TransferController implements the CRUD actions for Transfer model.
  */
@@ -60,6 +61,7 @@ class TransferController extends Controller
      */
     public function actionCreate()
     {
+
         $model = new Transfer();
 
         $loaded = $model->load(Yii::$app->request->post());
@@ -68,13 +70,57 @@ class TransferController extends Controller
             $model->date = date('Y-m-d H:i:s');
         }
 
-        if ($loaded && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
-        } else {
-            return $this->render('create', [
-                'model' => $model,
-            ]);
+        $inAccounts = [];
+        $outAccounts = [];
+        if ($loaded) {
+            $postAccs = Yii::$app->request->post();
+            foreach (Yii::$app->request->post() as $k => $acc) {
+                if (strpos($k, 'TransferAccount_in_') === 0) {
+                    $account = new TransferAccount();
+                    $account->id = str_replace('TransferAccount_in_', '', $k);
+                    $account->type = 'in';
+                    $account->load(Yii::$app->request->post());
+                    $inAccounts[] = $account;
+                }
+            }
         }
+
+        if ($loaded) {
+            $valid = $model->validate();
+            $valid = $valid && count($inAccounts);
+            foreach ($inAccounts as $account) {
+                $valid = $valid && $account->validate(['account_id', 'sum']);
+            }
+
+            if ($valid) {
+                try {
+                    Yii::$app->db->beginTransaction();
+
+                    $model->save();
+                    foreach ($inAccounts as $account) {
+                        $acc = clone $account;
+                        if (strpos($acc->id, 'new_') === 0) {
+                            $acc->id = null;
+                        }
+                        $acc->transfer_id = $model->id;
+                        $acc->type = 'in';
+                        $acc->save();
+                    }
+
+                    Yii::$app->db->getTransaction()->commit();
+                    return $this->redirect(['view', 'id' => $model->id]);
+                } catch (Exception $ex) {
+                    dump($ex);
+                    Yii::$app->db->getTransaction()->rollback();
+                }
+            }
+        }
+
+        return $this->render('create', [
+                        'model' => $model,
+                        'inAccounts' => $inAccounts,
+                        'outAccounts' => $outAccounts,
+                    ]);
     }
 
     /**
