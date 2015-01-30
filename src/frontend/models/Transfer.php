@@ -3,7 +3,7 @@
 namespace frontend\models;
 
 use Yii;
-
+use frontend\models\TransferAccount;
 /**
  * This is the model class for table "transfer".
  *
@@ -66,6 +66,14 @@ class Transfer extends \yii\db\ActiveRecord
             'comission' => Yii::t('transfer', 'Comission'),
             'comment' => Yii::t('transfer', 'Comment'),
         ];
+    }
+
+    public function inAccounts() {
+        return (new TransferAccount())->findAll(['transfer_id' => $this->id, 'type' => 'in']);
+    }
+
+    public function outAccounts() {
+        return (new TransferAccount())->findAll(['transfer_id' => $this->id, 'type' => 'out']);
     }
 
     /**

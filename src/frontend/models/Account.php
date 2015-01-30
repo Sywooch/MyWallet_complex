@@ -75,6 +75,10 @@ class Account extends \yii\db\ActiveRecord
         ];
     }
 
+    public function formatSum($sum) {
+        return sprintf($this->getCurrency()->one()->format, $sum);
+    }
+
     /**
      * @return \yii\db\ActiveQuery
      */

@@ -17,6 +17,9 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::a(Yii::t('transfer', 'Create {modelClass}', [
     'modelClass' => 'Transfer',
 ]), ['create'], ['class' => 'btn btn-success']) ?>
+
+        <?= Html::a(Yii::t('transfer', 'New income'), ['createincome'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a(Yii::t('transfer', 'New transfer'), ['createinternal'], ['class' => 'btn btn-success']) ?>
     </p>
 
     <?= GridView::widget([
@@ -26,12 +29,13 @@ $this->params['breadcrumbs'][] = $this->title;
 
             'id',
             'date',
-            'source',
-            'out_sum',
-            'dest',
+            'type',
+//            'source',
+//            'out_sum',
+//            'dest',
             // 'in_sum',
             // 'ratio',
-            // 'comission',
+             'comission',
             // 'comment:ntext',
 
             ['class' => 'yii\grid\ActionColumn'],

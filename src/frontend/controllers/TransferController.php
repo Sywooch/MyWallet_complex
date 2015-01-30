@@ -54,6 +54,149 @@ class TransferController extends Controller
         ]);
     }
 
+    public function actionCreateinternal() {
+        $model = new Transfer();
+
+        $loaded = $model->load(Yii::$app->request->post());
+
+        if (!$loaded) {
+            $model->date = date('Y-m-d H:i:s');
+        }
+
+        $inAccounts = [];
+        $outAccounts = [];
+        if ($loaded) {
+            $postAccs = Yii::$app->request->post();
+            foreach (Yii::$app->request->post() as $k => $acc) {
+                if (strpos($k, 'TransferAccount_in_') === 0) {
+                    $account = new TransferAccount();
+                    $account->id = str_replace('TransferAccount_in_', '', $k);
+                    $account->type = 'in';
+                    $account->load(Yii::$app->request->post());
+                    $inAccounts[] = $account;
+                }
+                if (strpos($k, 'TransferAccount_out_') === 0) {
+                    $account = new TransferAccount();
+                    $account->id = str_replace('TransferAccount_out_', '', $k);
+                    $account->type = 'out';
+                    $account->load(Yii::$app->request->post());
+                    $outAccounts[] = $account;
+                }
+            }
+        }
+//ddump($_POST, $inAccounts, $outAccounts);
+        if ($loaded) {
+            $valid = $model->validate();
+            $valid = $valid && count($inAccounts) && count($outAccounts);
+            foreach ($inAccounts as $account) {
+                $valid = $valid && $account->validate(['account_id', 'sum']);
+            }
+            foreach ($outAccounts as $account) {
+                $valid = $valid && $account->validate(['account_id', 'sum']);
+            }
+
+            if ($valid) {
+                try {
+                    Yii::$app->db->beginTransaction();
+                    $model->type = 'internal';
+                    $model->save();
+                    foreach ($inAccounts as $account) {
+                        $acc = clone $account;
+                        if (strpos($acc->id, 'new_') === 0) {
+                            $acc->id = null;
+                        }
+                        $acc->transfer_id = $model->id;
+                        $acc->type = 'in';
+                        $acc->save();
+                    }
+                    foreach ($outAccounts as $account) {
+                        $acc = clone $account;
+                        if (strpos($acc->id, 'new_') === 0) {
+                            $acc->id = null;
+                        }
+                        $acc->transfer_id = $model->id;
+                        $acc->type = 'out';
+                        $acc->save();
+                    }
+
+                    Yii::$app->db->getTransaction()->commit();
+                    return $this->redirect(['view', 'id' => $model->id]);
+                } catch (Exception $ex) {
+                    dump($ex);
+                    Yii::$app->db->getTransaction()->rollback();
+                }
+            }
+        }
+
+        return $this->render('internal-create', [
+                        'model' => $model,
+                        'inAccounts' => $inAccounts,
+                        'outAccounts' => $outAccounts,
+                    ]);
+    }
+
+    public function actionCreateincome() {
+        $model = new Transfer();
+
+        $loaded = $model->load(Yii::$app->request->post());
+
+        if (!$loaded) {
+            $model->date = date('Y-m-d H:i:s');
+        }
+
+        $inAccounts = [];
+        $outAccounts = [];
+        if ($loaded) {
+            $postAccs = Yii::$app->request->post();
+            foreach (Yii::$app->request->post() as $k => $acc) {
+                if (strpos($k, 'TransferAccount_in_') === 0) {
+                    $account = new TransferAccount();
+                    $account->id = str_replace('TransferAccount_in_', '', $k);
+                    $account->type = 'in';
+                    $account->load(Yii::$app->request->post());
+                    $inAccounts[] = $account;
+                }
+            }
+        }
+
+        if ($loaded) {
+            $valid = $model->validate();
+            $valid = $valid && count($inAccounts);
+            foreach ($inAccounts as $account) {
+                $valid = $valid && $account->validate(['account_id', 'sum']);
+            }
+
+            if ($valid) {
+                try {
+                    Yii::$app->db->beginTransaction();
+                    $model->type = 'incoming';
+                    $model->save();
+                    foreach ($inAccounts as $account) {
+                        $acc = clone $account;
+                        if (strpos($acc->id, 'new_') === 0) {
+                            $acc->id = null;
+                        }
+                        $acc->transfer_id = $model->id;
+                        $acc->type = 'in';
+                        $acc->save();
+                    }
+
+                    Yii::$app->db->getTransaction()->commit();
+                    return $this->redirect(['view', 'id' => $model->id]);
+                } catch (Exception $ex) {
+                    dump($ex);
+                    Yii::$app->db->getTransaction()->rollback();
+                }
+            }
+        }
+
+        return $this->render('income-create', [
+                        'model' => $model,
+                        'inAccounts' => $inAccounts,
+                        'outAccounts' => $outAccounts,
+                    ]);
+    }
+
     /**
      * Creates a new Transfer model.
      * If creation is successful, the browser will be redirected to the 'view' page.

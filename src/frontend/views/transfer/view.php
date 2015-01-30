@@ -5,8 +5,17 @@ use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
 /* @var $model frontend\models\Transfer */
-
-$this->title = $model->id;
+switch ($model->type) {
+    case 'incoming' :
+        $this->title = 'Income';
+        break;
+    case 'internal':
+        $this->title = 'Internal transaction';
+        break;
+    case 'outgoing':
+        $this->title = 'Expense';
+        break;
+}
 $this->params['breadcrumbs'][] = ['label' => Yii::t('transfer', 'Transfers'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
@@ -16,28 +25,44 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <p>
         <?= Html::a(Yii::t('transfer', 'Update'), ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
-        <?= Html::a(Yii::t('transfer', 'Delete'), ['delete', 'id' => $model->id], [
+        <?=
+        Html::a(Yii::t('transfer', 'Delete'), ['delete', 'id' => $model->id], [
             'class' => 'btn btn-danger',
             'data' => [
                 'confirm' => Yii::t('transfer', 'Are you sure you want to delete this item?'),
                 'method' => 'post',
             ],
-        ]) ?>
+        ])
+        ?>
     </p>
 
-    <?= DetailView::widget([
+    <?=
+    DetailView::widget([
         'model' => $model,
         'attributes' => [
             'id',
             'date',
-            'source',
-            'out_sum',
-            'dest',
-            'in_sum',
-            'ratio',
-            'comission',
             'comment:ntext',
         ],
-    ]) ?>
-
+    ])
+    ?>
+    <h2>Accounts</h2>
+    <table class="table table-striped table-bordered detail-view">
+        <tbody>
+        <?php foreach ($model->inAccounts() as $account) : ?>
+            <tr>
+                <th><?= $account->account->title; ?></th>
+                <td><?= $account->type; ?></td>
+                <td><?= $account->type == 'in' ? '' : '-'; ?><?= $account->account->formatSum($account->sum); ?></td>
+            </tr>
+        <?php endforeach; ?>
+        <?php foreach ($model->outAccounts() as $account) : ?>
+            <tr>
+                <th><?= $account->account->title; ?></th>
+                <td><?= $account->type; ?></td>
+                <td><?= $account->type == 'in' ? '' : '-'; ?><?= $account->account->formatSum($account->sum); ?></td>
+            </tr>
+        <?php endforeach; ?>
+        </tbody>
+    </table>
 </div>
